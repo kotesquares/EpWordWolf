@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Users, QrCode, Copy, Check, MessageSquareHeart, Sparkles } from 'lucide-react';
+import { Users, QrCode, Copy, Check, MessageSquareHeart, Sparkles, LogOut } from 'lucide-react';
 
-export default function Header({ gameState, myPlayerId, onOpenQR }) {
+export default function Header({ gameState, myPlayerId, onOpenQR, onLeaveRoom }) {
   const [copied, setCopied] = useState(false);
   const [showPlayersList, setShowPlayersList] = useState(false);
 
@@ -10,6 +10,12 @@ export default function Header({ gameState, myPlayerId, onOpenQR }) {
     navigator.clipboard.writeText(gameState.roomCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleLeaveClick = () => {
+    if (window.confirm('ほんとうにお部屋をぬけるよ？いいかな？')) {
+      onLeaveRoom();
+    }
   };
 
   const players = gameState?.players || [];
@@ -31,19 +37,19 @@ export default function Header({ gameState, myPlayerId, onOpenQR }) {
                 人狼風
               </span>
             </h1>
-            <p className="text-[11px] text-slate-400 font-medium">エピソード推測ゲーム</p>
+            <p className="text-[11px] text-slate-400 font-medium">エピソードすいそくゲーム</p>
           </div>
         </div>
 
-        {/* 右側：ルーム情報・QR・プレイヤー一覧 */}
+        {/* 右側：ルーム情報・QR・プレイヤー一覧・ぬけるボタン */}
         {roomCode && (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1.5">
             
             {/* ルームコード・コピーボタン */}
             <button
               onClick={handleCopyCode}
-              className="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border border-slate-200/80"
-              title="ルームコードをコピー"
+              className="flex items-center space-x-1 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 px-2 py-1.5 rounded-lg text-xs font-bold transition-all border border-slate-200/80"
+              title="コードをコピーするよ"
             >
               <span className="text-slate-400 font-normal">CODE:</span>
               <span className="tracking-wider text-blue-600 font-mono font-extrabold">{roomCode}</span>
@@ -53,8 +59,8 @@ export default function Header({ gameState, myPlayerId, onOpenQR }) {
             {/* QRコードボタン */}
             <button
               onClick={onOpenQR}
-              className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-slate-200"
-              title="招待QRコードを表示"
+              className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-slate-200"
+              title="しょうたいQRコードをみせるよ"
             >
               <QrCode className="w-4 h-4" />
             </button>
@@ -62,10 +68,19 @@ export default function Header({ gameState, myPlayerId, onOpenQR }) {
             {/* プレイヤー数ボタン */}
             <button
               onClick={() => setShowPlayersList(!showPlayersList)}
-              className="flex items-center space-x-1 bg-blue-50 text-blue-700 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors border border-blue-200/60"
+              className="flex items-center space-x-1 bg-blue-50 text-blue-700 hover:bg-blue-100 px-2 py-1.5 rounded-lg text-xs font-bold transition-colors border border-blue-200/60"
             >
               <Users className="w-3.5 h-3.5" />
               <span>{players.length}人</span>
+            </button>
+
+            {/* お部屋をぬけるボタン */}
+            <button
+              onClick={handleLeaveClick}
+              className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors border border-rose-200"
+              title="お部屋をぬけるよ"
+            >
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         )}
@@ -76,7 +91,7 @@ export default function Header({ gameState, myPlayerId, onOpenQR }) {
         <div className="absolute right-4 top-16 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-40 animate-pop">
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-              <Users className="w-3.5 h-3.5" /> 参加プレイヤー ({players.length}名)
+              <Users className="w-3.5 h-3.5" /> さんかメンバー ({players.length}名)
             </h3>
             <button
               onClick={() => setShowPlayersList(false)}
@@ -99,7 +114,7 @@ export default function Header({ gameState, myPlayerId, onOpenQR }) {
                   </div>
                   <span className="font-semibold truncate max-w-[110px]">{p.name}</span>
                   {p.id === myPlayerId && (
-                    <span className="text-[10px] bg-blue-200 text-blue-800 px-1 rounded font-bold">あなた</span>
+                    <span className="text-[10px] bg-blue-200 text-blue-800 px-1 rounded font-bold">きみ</span>
                   )}
                 </div>
                 {p.isHost && (

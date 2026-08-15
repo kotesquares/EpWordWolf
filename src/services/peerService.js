@@ -20,7 +20,7 @@ export class PeerManager {
       phase: 'LOBBY', // LOBBY, ANSWERING, GUESSING, RESULT
       roomCode: '',
       hostId: '',
-      topic: 'もし1億円手に入ったら何に使う？',
+      topic: 'もし1おく円が手に入ったら何に使う？',
       timeLimit: 120, // 秒
       timeRemaining: 120,
       timerActive: false,
@@ -73,9 +73,9 @@ export class PeerManager {
         this.peer.on('error', (err) => {
           console.error('Peer error on host:', err);
           if (err.type === 'unavailable-id') {
-            reject(new Error('このルームコードはすでに使用されています。別のコードをお試しください。'));
+            reject(new Error('このへやコードはもうつかわれているよ！別のコードをためしてね。'));
           } else {
-            reject(new Error('通信エラーが発生しました: ' + err.message));
+            reject(new Error('通信エラーがおきたよ: ' + err.message));
           }
         });
       } catch (e) {
@@ -125,19 +125,19 @@ export class PeerManager {
           });
 
           conn.on('error', (err) => {
-            reject(new Error('ホストへの接続に失敗しました: ' + err.message));
+            reject(new Error('ホストにつながらなかったよ: ' + err.message));
           });
           
           setTimeout(() => {
             if (!conn.open) {
-              reject(new Error('ルームが見つからないか、ホストが応答しません。ルームコードをご確認ください。'));
+              reject(new Error('へやが見つからないか、ホストがへんじしないよ。へやコードをたしかめてね！'));
             }
           }, 8000);
         });
 
         this.peer.on('error', (err) => {
           console.error('Peer error on guest:', err);
-          reject(new Error('ルーム接続エラー: ' + err.message));
+          reject(new Error('へやへ接続できなかったよ: ' + err.message));
         });
       } catch (e) {
         reject(e);
@@ -194,10 +194,7 @@ export class PeerManager {
         this.state.answers[playerId] = answer;
         this.broadcastState();
 
-        // 全員送信完了の判定
-        if (Object.keys(this.state.answers).length >= this.state.players.length) {
-          this.startGuessPhase();
-        }
+        // 全員送信完了しても自動遷移せず、ホストの「お題の回答をみる」操作や手動進行を待つ
         break;
       }
 
@@ -207,7 +204,7 @@ export class PeerManager {
           this.state.votes[episodeAuthorId] = {};
         }
         this.state.votes[episodeAuthorId][voterId] = guessedAuthorId;
-        // 投票状況を保存・同期（全員が完了しても自動で結果画面へ行かず、ホストのボタン操作を待つ）
+        // 全員完了しても自動遷移せず同期のみ
         this.broadcastState();
         break;
       }
@@ -229,7 +226,6 @@ export class PeerManager {
   }
 
   handleGuestDisconnect(peerId) {
-    // 該当接続のプレイヤーを disconnected 表示にする
     for (const [playerId, conn] of this.connections.entries()) {
       if (conn.peer === peerId) {
         const player = this.state.players.find(p => p.id === playerId);
@@ -261,10 +257,8 @@ export class PeerManager {
     this.state.currentEpisodeIndex = 0;
     this.state.timeRemaining = this.state.timeLimit;
     
-    this.startTimer(() => {
-      // 時間切れで全回答が集まっていなくてもGuessフェーズへ移行
-      this.startGuessPhase();
-    });
+    // 制限時間は目安！0秒になっても何もしない
+    this.startTimer(null);
 
     this.broadcastState();
   }
@@ -274,10 +268,6 @@ export class PeerManager {
     if (!this.isHost) return;
     this.state.answers[this.myPlayerId] = answer;
     this.broadcastState();
-
-    if (Object.keys(this.state.answers).length >= this.state.players.length) {
-      this.startGuessPhase();
-    }
   }
 
   startGuessPhase() {
@@ -286,7 +276,7 @@ export class PeerManager {
 
     const answeredPlayerIds = Object.keys(this.state.answers);
     if (answeredPlayerIds.length === 0) {
-      alert('誰も回答を提出しませんでした！');
+      alert('だれもかいとうを書いていないよ！');
       this.state.phase = 'LOBBY';
       this.broadcastState();
       return;
@@ -298,9 +288,9 @@ export class PeerManager {
     this.state.currentEpisodeIndex = 0;
     this.state.phase = 'GUESSING';
     this.state.votes = {};
-    this.state.timeRemaining = 60; // 60秒目安（0秒になっても強制終了せず投票可能）
+    this.state.timeRemaining = 60;
 
-    // タイマー開始（0秒になっても自動で画面遷移しない）
+    // 制限時間は目安！0秒になっても何もしない
     this.startTimer(null);
 
     this.broadcastState();
@@ -327,16 +317,9 @@ export class PeerManager {
   calculateScoresAndFinish() {
     this.state.phase = 'RESULT';
     
-    // スコア計算ルール
-    // 1. 的中ポイント: 正解（エピソードの本当の作者）を当てたプレイヤーに +100pt
-    // 2. かく乱ポイント: 自分のエピソードに対して、他のプレイヤーが「騙された（自分以外を選択または他の人を選んだ）」または「自分を選ばせた」
-    //    詳細：自分のエピソードに対して、他人が誰かを選んだ際、本当の作者（自分）だと見抜けなかった（不正解の投票）1票ごとに +50pt
-    // 3. 完全隠蔽ボーナス: 自分のエピソードを誰も正解できなかった場合 +100pt
-
     const players = this.state.players;
-    const votes = this.state.votes; // episodeAuthorId -> { voterId -> guessedId }
+    const votes = this.state.votes;
 
-    // 今回のラウンドスコア初期化
     players.forEach(p => {
       if (!this.state.scores[p.id]) {
         this.state.scores[p.id] = { total: 0, currentRound: 0, correctGuesses: 0, trickedOthers: 0 };
@@ -346,16 +329,13 @@ export class PeerManager {
       this.state.scores[p.id].roundTricked = 0;
     });
 
-    // 各エピソードごとの採点
     Object.keys(votes).forEach(authorId => {
       const episodeVotes = votes[authorId] || {};
       let totalOtherVoters = 0;
       let correctCount = 0;
 
       Object.entries(episodeVotes).forEach(([voterId, guessedId]) => {
-        // 的中判定 (自分自身の回答への投票は除外してスコア計算)
         if (guessedId === authorId) {
-          // 正解！
           if (this.state.scores[voterId]) {
             this.state.scores[voterId].currentRound += 100;
             this.state.scores[voterId].correctGuesses += 1;
@@ -365,7 +345,6 @@ export class PeerManager {
             correctCount++;
           }
         } else {
-          // 不正解＝作者が騙しに成功
           if (voterId !== authorId && this.state.scores[authorId]) {
             this.state.scores[authorId].currentRound += 50;
             this.state.scores[authorId].trickedOthers += 1;
@@ -378,13 +357,11 @@ export class PeerManager {
         }
       });
 
-      // 完全隠蔽ボーナス（他プレイヤーが1人以上いて、誰も作者を当てられなかった場合）
       if (totalOtherVoters > 0 && correctCount === 0 && this.state.scores[authorId]) {
         this.state.scores[authorId].currentRound += 100;
       }
     });
 
-    // 累計スコアに反映
     players.forEach(p => {
       const s = this.state.scores[p.id];
       if (s) {
@@ -421,7 +398,7 @@ export class PeerManager {
 
   submitGuestVote(guessedAuthorId) {
     if (this.hostConnection && this.hostConnection.open) {
-      const currentAuthorId = this.state.episodeOrder[this.state.currentEpisodeIndex];
+      const currentAuthorId = this.state.episodeOrder[0];
       this.hostConnection.send({
         type: 'SUBMIT_VOTE',
         voterId: this.myPlayerId,
@@ -456,7 +433,7 @@ export class PeerManager {
     conn.on('close', () => {
       console.log('Host connection closed');
       if (this.onError) {
-        this.onError('ホストとの接続が切断されました。');
+        this.onError('ホストとの接続が切れたよ！');
       }
     });
   }
@@ -471,7 +448,9 @@ export class PeerManager {
         this.state.timeRemaining -= 1;
         this.broadcastState();
       } else {
+        // 0秒になっても何もしない（目安タイマー）
         this.stopTimer();
+        this.broadcastState();
         if (onTimeout) onTimeout();
       }
     }, 1000);
@@ -492,7 +471,6 @@ export class PeerManager {
 
     if (!this.isHost) return;
 
-    // 全ゲスト接続にブロードキャスト
     for (const conn of this.connections.values()) {
       if (conn.open) {
         conn.send({
@@ -508,19 +486,25 @@ export class PeerManager {
     if (this.peer) {
       this.peer.destroy();
     }
+    this.state = {
+      phase: 'LOBBY',
+      roomCode: '',
+      hostId: '',
+      topic: 'もし1おく円が手に入ったら何に使う？',
+      timeLimit: 120,
+      timeRemaining: 120,
+      timerActive: false,
+      players: [],
+      answers: {},
+      episodeOrder: [],
+      currentEpisodeIndex: 0,
+      votes: {},
+      scores: {},
+    };
   }
 }
 
 // ユーティリティ
-function shuffleArray(array) {
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
 const AVATAR_COLORS = [
   'bg-blue-500', 'bg-emerald-500', 'bg-purple-500', 'bg-amber-500', 
   'bg-rose-500', 'bg-indigo-500', 'bg-teal-500', 'bg-orange-500'

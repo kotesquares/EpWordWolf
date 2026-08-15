@@ -54,6 +54,15 @@ export default function App() {
     }
   };
 
+  const handleLeaveRoom = () => {
+    if (peerManagerRef.current) {
+      peerManagerRef.current.disconnect();
+    }
+    setGameState(null);
+    setMyPlayerId('');
+    setIsHost(false);
+  };
+
   const handleUpdateSettings = (topic, timeLimit) => {
     if (!peerManagerRef.current) return;
     if (isHost) {
@@ -109,6 +118,7 @@ export default function App() {
         gameState={gameState}
         myPlayerId={myPlayerId}
         onOpenQR={() => setShowQRModal(true)}
+        onLeaveRoom={handleLeaveRoom}
       />
 
       {/* エラー通知 */}
@@ -119,7 +129,7 @@ export default function App() {
             onClick={() => setGlobalError('')}
             className="bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-[10px]"
           >
-            閉じる
+            とじる
           </button>
         </div>
       )}
@@ -176,7 +186,7 @@ export default function App() {
 
       {/* フッター */}
       <footer className="py-4 text-center text-[11px] text-slate-400 font-medium border-t border-slate-200/60 bg-white">
-        エピソード人狼 - 誰の文章でしょう？推測ゲーム (自前サーバー不要 / PeerJS)
+        エピソード人狼 - 誰の文章でしょう？すいそくゲーム
       </footer>
 
     </div>

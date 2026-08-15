@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, Clock, Sparkles, MessageSquare } from 'lucide-react';
+import { Send, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
 
 export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
   const [answerText, setAnswerText] = useState('');
@@ -10,7 +10,6 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
   const answers = gameState?.answers || {};
   const timeRemaining = gameState?.timeRemaining ?? 0;
 
-  // 提出済みプレイヤー数
   const submittedCount = Object.keys(answers).length;
   const totalPlayers = players.length;
   const isMyAnswerSubmitted = !!answers[myPlayerId] || hasSubmitted;
@@ -29,13 +28,15 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
       <div className="bg-white rounded-3xl p-5 shadow-soft border border-slate-200/80 flex items-center justify-between">
         <div>
           <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            PHASE 1: エピソード入力
+            PHASE 1: エピソードをかくよ
           </span>
-          <h2 className="text-sm font-extrabold text-slate-800 mt-1">回答を作成してください</h2>
+          <h2 className="text-xs font-bold text-slate-500 mt-1">お題への回答を書いてね</h2>
         </div>
         <div className="flex items-center space-x-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-          <Clock className="w-4 h-4 text-blue-600 animate-pulse" />
-          <span className="text-xs font-black font-mono text-slate-800">{timeRemaining}秒</span>
+          <Clock className={`w-4 h-4 ${timeRemaining > 0 ? 'text-blue-600 animate-pulse' : 'text-slate-400'}`} />
+          <span className="text-xs font-black font-mono text-slate-800">
+            {timeRemaining > 0 ? `${timeRemaining}秒` : '0秒 (めやす)'}
+          </span>
         </div>
       </div>
 
@@ -50,7 +51,7 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
             「{topic}」
           </p>
           <p className="text-[11px] text-blue-100/80">
-            ※あなただとバレないように書き方を工夫するのも作戦です！
+            ※じぶんの回答だとバレないように書き方をくふうしてね！
           </p>
         </div>
       </div>
@@ -60,14 +61,14 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
         <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-6 shadow-soft border border-slate-200/80 space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-2 flex items-center gap-1">
-              <MessageSquare className="w-4 h-4 text-blue-500" /> エピソード・回答を入力
+              <MessageSquare className="w-4 h-4 text-blue-500" /> エピソード・回答を入力してね
             </label>
             <textarea
               value={answerText}
               onChange={(e) => setAnswerText(e.target.value)}
               rows={4}
               maxLength={150}
-              placeholder="ここに回答を入力してください（例：高校生の時に修学旅行で大失敗して…）"
+              placeholder="ここに文章を書いてね（例：むかし修学旅行で大失敗をして…）"
               className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none placeholder:font-normal placeholder:text-slate-400"
             />
             <div className="text-right text-[11px] text-slate-400 font-bold mt-1">
@@ -85,7 +86,7 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
             }`}
           >
             <Send className="w-4 h-4" />
-            <span>匿名で送信する</span>
+            <span>匿名でおくるよ</span>
           </button>
         </form>
       ) : (
@@ -95,10 +96,10 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
             <CheckCircle2 className="w-7 h-7" />
           </div>
           <h3 className="text-base font-extrabold text-emerald-900">
-            回答を送信しました！
+            回答をおくったよ！
           </h3>
           <p className="text-xs text-emerald-700 font-medium max-w-xs mx-auto">
-            全員の回答が集まるまでお待ちください。
+            みんなの回答があつまるまでまっていてね。
           </p>
         </div>
       )}
@@ -106,8 +107,8 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
       {/* リアルタイム進捗状況 */}
       <div className="bg-white rounded-3xl p-5 shadow-soft border border-slate-200/80 space-y-3">
         <div className="flex items-center justify-between text-xs font-bold">
-          <span className="text-slate-600">回答提出状況</span>
-          <span className="text-blue-600 font-mono font-black">{submittedCount} / {totalPlayers}人完了</span>
+          <span className="text-slate-600">みんなの回答状況</span>
+          <span className="text-blue-600 font-mono font-black">{submittedCount} / {totalPlayers}人かんりょう</span>
         </div>
 
         {/* プログレスバー */}

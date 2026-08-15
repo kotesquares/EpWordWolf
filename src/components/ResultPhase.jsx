@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Trophy, Award, RefreshCw, Sparkles, CheckCircle2, User, UserX, Crown, ShieldAlert } from 'lucide-react';
+import { Trophy, RefreshCw, Sparkles, CheckCircle2, UserX, Crown } from 'lucide-react';
 
 export default function ResultPhase({
   gameState,
@@ -14,14 +14,12 @@ export default function ResultPhase({
   const scores = gameState?.scores || {};
   const topic = gameState?.topic || '';
 
-  // スコア順にソートしたランキング
   const rankedPlayers = [...players].sort((a, b) => {
     const scoreA = scores[a.id]?.total || 0;
     const scoreB = scores[b.id]?.total || 0;
     return scoreB - scoreA;
   });
 
-  // 紙吹雪アニメーション
   useEffect(() => {
     try {
       confetti({
@@ -42,10 +40,10 @@ export default function ResultPhase({
       <div className="text-center space-y-2">
         <div className="inline-flex items-center space-x-1.5 bg-amber-100 text-amber-800 text-xs font-extrabold px-3.5 py-1 rounded-full shadow-sm">
           <Trophy className="w-4 h-4 text-amber-600" />
-          <span>結果発表 & スコア集計</span>
+          <span>けっか発表だよ！</span>
         </div>
         <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-          最終スコアランキング
+          スコアランキング
         </h2>
         <p className="text-xs text-slate-500">
           お題：「{topic}」
@@ -75,7 +73,6 @@ export default function ResultPhase({
                 }`}
               >
                 <div className="flex items-center space-x-3">
-                  {/* 順位バッジ */}
                   <div className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center ${
                     index === 0 ? 'bg-amber-400 text-amber-950 shadow-sm' :
                     index === 1 ? 'bg-slate-300 text-slate-800' :
@@ -88,19 +85,17 @@ export default function ResultPhase({
                     <div className="flex items-center space-x-1.5">
                       <span className="text-sm font-extrabold text-slate-800">{p.name}</span>
                       {p.id === myPlayerId && (
-                        <span className="text-[10px] bg-blue-200 text-blue-800 font-bold px-1.5 py-0.5 rounded">YOU</span>
+                        <span className="text-[10px] bg-blue-200 text-blue-800 font-bold px-1.5 py-0.5 rounded">きみ</span>
                       )}
                     </div>
-                    {/* 今回の獲得ポイント内訳 */}
                     <div className="flex items-center space-x-2 text-[10px] font-bold text-slate-500 mt-0.5">
-                      <span className="text-emerald-600">的中: {playerScore.correctGuesses}回</span>
+                      <span className="text-emerald-600">あてた: {playerScore.correctGuesses}回</span>
                       <span>•</span>
-                      <span className="text-purple-600">かく乱: {playerScore.trickedOthers}人</span>
+                      <span className="text-purple-600">だました: {playerScore.trickedOthers}人</span>
                     </div>
                   </div>
                 </div>
 
-                {/* ポイント表示 */}
                 <div className="text-right">
                   <div className="text-lg font-black font-mono text-blue-600">
                     {playerScore.total} <span className="text-xs font-sans text-slate-500">pt</span>
@@ -120,7 +115,7 @@ export default function ResultPhase({
       {/* エピソード別・正解 ＆ 誰が誰を選んだかの明細 */}
       <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-200/80 space-y-4">
         <h3 className="text-xs font-bold text-slate-600 flex items-center gap-1">
-          <Sparkles className="w-4 h-4 text-amber-500" /> 各エピソードの正解 ＆ 投票内訳
+          <Sparkles className="w-4 h-4 text-amber-500" /> せいかいと投票の内訳
         </h3>
 
         <div className="space-y-4">
@@ -131,26 +126,23 @@ export default function ResultPhase({
             return (
               <div key={authorId} className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-3">
                 
-                {/* 作者開示 */}
                 <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
-                  <span className="text-[11px] font-bold text-slate-400">エピソード {i + 1}</span>
+                  <span className="text-[11px] font-bold text-slate-400">ピックアップ・エピソード</span>
                   <div className="flex items-center space-x-1.5">
-                    <span className="text-xs text-slate-500 font-medium">本当の作者：</span>
+                    <span className="text-xs text-slate-500 font-medium">ほんとうのかいた人：</span>
                     <span className="text-xs font-extrabold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">
-                      {author?.name || '不明'}
+                      {author?.name || '不明'} さん
                     </span>
                   </div>
                 </div>
 
-                {/* 本文 */}
                 <p className="text-sm font-bold text-slate-800 bg-white p-3 rounded-xl border border-slate-100">
                   「{answerText}」
                 </p>
 
-                {/* 投票内訳リスト */}
                 <div className="space-y-1.5 pt-1">
                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    みんなの推測投票:
+                    みんなの予想とうひょう:
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                     {Object.entries(episodeVotes).map(([voterId, guessedId]) => {
@@ -193,11 +185,11 @@ export default function ResultPhase({
           className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white font-black py-4 rounded-2xl text-base shadow-pop transition-all"
         >
           <RefreshCw className="w-5 h-5" />
-          <span>お題を変えてもう一度遊ぶ</span>
+          <span>お題をかえてもう一度あそぶ</span>
         </button>
       ) : (
         <div className="bg-slate-100 border border-slate-200 text-slate-600 p-4 rounded-2xl text-center text-xs font-bold">
-          ホストが次のゲームを開始するのを待っています…
+          ホストがつぎのゲームをはじめるのをまっているよ…
         </div>
       )}
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dices, Play, Users, Clock, Sparkles, LogIn, PlusCircle, Shuffle, ChevronDown } from 'lucide-react';
+import { Dices, Play, Users, Clock, Sparkles, LogIn, PlusCircle, Shuffle } from 'lucide-react';
 import { TOPIC_CATEGORIES, getRandomTopic } from '../data/topics';
 
 export default function LobbyPhase({
@@ -16,12 +16,12 @@ export default function LobbyPhase({
   });
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [topicInput, setTopicInput] = useState(gameState?.topic || 'もし1億円手に入ったら何に使う？');
+  const [topicInput, setTopicInput] = useState(gameState?.topic || 'もし1おく円が手に入ったら何に使う？');
   const [timeLimitSelect, setTimeLimitSelect] = useState(gameState?.timeLimit || 120);
   const [isJoiningMode, setIsJoiningMode] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // URLクエリパラメータ `?room=XXXX` からルームコードを自動取得
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const roomParam = params.get('room');
@@ -31,7 +31,6 @@ export default function LobbyPhase({
     }
   }, []);
 
-  // ホストのお題同期
   useEffect(() => {
     if (gameState?.topic) {
       setTopicInput(gameState.topic);
@@ -46,23 +45,21 @@ export default function LobbyPhase({
     localStorage.setItem('epww_player_name', name);
   };
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleCreate = async () => {
     if (!playerName.trim()) {
-      setErrorMsg('プレイヤー名を入力してください。');
+      setErrorMsg('なまえをいれてね！');
       return;
     }
     setErrorMsg('');
     setIsSubmitting(true);
     handleSaveName(playerName.trim());
     
-    // ランダム4桁コード生成
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    // ランダム6桁コード生成
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
     try {
       await onCreateRoom(playerName.trim(), code);
     } catch (err) {
-      setErrorMsg(err.message || '部屋の作成に失敗しました');
+      setErrorMsg(err.message || 'へやがつくtpcなかったよ！');
     } finally {
       setIsSubmitting(false);
     }
@@ -70,20 +67,23 @@ export default function LobbyPhase({
 
   const handleJoin = async () => {
     if (!playerName.trim()) {
-      setErrorMsg('プレイヤー名を入力してください。');
+      setErrorMsg('なまえをいれてね！');
       return;
     }
     if (!roomCodeInput.trim()) {
-      setErrorMsg('ルームコードを入力してください。');
+      setErrorMsg('へやコード（6けたの数字）をいれてね！');
       return;
     }
     setErrorMsg('');
+    setIsSubmitting(true);
     handleSaveName(playerName.trim());
 
     try {
       await onJoinRoom(playerName.trim(), roomCodeInput.trim());
     } catch (err) {
-      setErrorMsg(err.message || '部屋の参加に失敗しました');
+      setErrorMsg(err.message || 'へやにはいれなかったよ！');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -121,13 +121,13 @@ export default function LobbyPhase({
       <div className="text-center space-y-2 mb-4">
         <div className="inline-flex items-center space-x-1.5 bg-blue-100 text-blue-800 text-xs font-extrabold px-3 py-1 rounded-full shadow-sm">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>GM不要！全員で遊べる匿名推測ゲーム</span>
+          <span>みんなで遊べる匿名すいそくゲーム！</span>
         </div>
         <h2 className="text-2xl font-black text-slate-800 tracking-tight">
           誰の文章でしょう？
         </h2>
         <p className="text-xs text-slate-500 max-w-sm mx-auto">
-          みんなで集まって匿名でお題に回答！巧妙に自分を偽り、誰のエピソードかを当てよう。
+          お題にこたえて、だれが書いた文章かあてっこしよう！自分の文章は上手くだましてね。
         </p>
       </div>
 
@@ -146,13 +146,13 @@ export default function LobbyPhase({
           {/* 名前入力 */}
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1.5">
-              あなたのプレイヤー名 <span className="text-rose-500">*</span>
+              きみのなまえ <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="例：たろう、匿名希望"
+              placeholder="例：たろう、名探偵"
               maxLength={12}
               className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:font-normal placeholder:text-slate-400"
             />
@@ -168,7 +168,7 @@ export default function LobbyPhase({
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              部屋を作る (ホスト)
+              へやをつくる (ホスト)
             </button>
             <button
               onClick={() => setIsJoiningMode(true)}
@@ -178,7 +178,7 @@ export default function LobbyPhase({
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              部屋に参加する
+              へやにはいる
             </button>
           </div>
 
@@ -195,10 +195,10 @@ export default function LobbyPhase({
                 }`}
               >
                 <PlusCircle className="w-5 h-5" />
-                <span>{isSubmitting ? '部屋を作成中...' : '新しい部屋を作成してホストになる'}</span>
+                <span>{isSubmitting ? 'へやをつくっているよ...' : 'あたらしいへやをつくる'}</span>
               </button>
               <p className="text-[11px] text-slate-400 text-center">
-                ※ホストもGMではなく一人のプレイヤーとして参加できます！
+                ※へやをつくったホストもプレイヤーとしていっしょに遊べるよ！
               </p>
             </div>
           ) : (
@@ -206,23 +206,28 @@ export default function LobbyPhase({
             <div className="space-y-4 pt-1">
               <div>
                 <label className="block text-xs font-bold text-slate-600 mb-1.5">
-                  ルームコード (数字4桁)
+                  へやコード (数字6けた)
                 </label>
                 <input
                   type="text"
                   value={roomCodeInput}
                   onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
-                  placeholder="例：8492"
+                  placeholder="例：849201"
                   maxLength={6}
                   className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-lg font-mono font-black tracking-widest text-center text-blue-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:tracking-normal"
                 />
               </div>
               <button
                 onClick={handleJoin}
-                className="w-full flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-emerald-600/20 text-sm transition-all"
+                disabled={isSubmitting}
+                className={`w-full flex items-center justify-center space-x-2 font-extrabold py-3.5 rounded-2xl text-sm transition-all ${
+                  isSubmitting
+                    ? 'bg-slate-300 text-slate-500 cursor-wait'
+                    : 'bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white shadow-lg shadow-emerald-600/20'
+                }`}
               >
                 <LogIn className="w-5 h-5" />
-                <span>ルームに参加する</span>
+                <span>{isSubmitting ? 'へやにはいっているよ...' : 'へやにはいる'}</span>
               </button>
             </div>
           )}
@@ -241,7 +246,7 @@ export default function LobbyPhase({
               </span>
               {isHost && (
                 <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-full">
-                  ホスト編集可能
+                  ホストがかえられるよ
                 </span>
               )}
             </div>
@@ -254,7 +259,7 @@ export default function LobbyPhase({
                   onChange={handleTopicChange}
                   rows={2}
                   className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
-                  placeholder="お題を自由に入力してください"
+                  placeholder="お題を自由に入力してね"
                 />
 
                 {/* お題ガチャ枠 */}
@@ -280,7 +285,7 @@ export default function LobbyPhase({
                     className="w-full flex items-center justify-center space-x-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-2 rounded-xl text-xs transition-colors border border-indigo-100"
                   >
                     <Shuffle className="w-3.5 h-3.5" />
-                    <span>ランダムでお題をひく</span>
+                    <span>ランダムでお題をひくよ</span>
                   </button>
                 </div>
               </div>
@@ -296,7 +301,7 @@ export default function LobbyPhase({
             {/* 制限時間設定 */}
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
               <span className="text-xs font-bold text-slate-600 flex items-center gap-1">
-                <Clock className="w-4 h-4 text-slate-400" /> 回答制限時間
+                <Clock className="w-4 h-4 text-slate-400" /> めやすの制限時間
               </span>
               {isHost ? (
                 <select
@@ -304,14 +309,14 @@ export default function LobbyPhase({
                   onChange={handleTimeChange}
                   className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 focus:outline-none"
                 >
-                  <option value={60}>60秒 (爆速)</option>
-                  <option value={90}>90秒 (標準)</option>
+                  <option value={60}>60秒 (ハヤイ)</option>
+                  <option value={90}>90秒 (ふつう)</option>
                   <option value={120}>120秒 (じっくり)</option>
-                  <option value={180}>180秒 (長め)</option>
+                  <option value={180}>180秒 (ながめ)</option>
                 </select>
               ) : (
                 <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
-                  {gameState.timeLimit}秒
+                  {gameState.timeLimit}秒 (めやす)
                 </span>
               )}
             </div>
@@ -322,10 +327,10 @@ export default function LobbyPhase({
           <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-200/80 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                <Users className="w-4 h-4 text-blue-500" /> 参加プレイヤー ({players.length}名)
+                <Users className="w-4 h-4 text-blue-500" /> さんかメンバー ({players.length}名)
               </h3>
               <span className="text-xs font-bold text-slate-400">
-                2名以上でスタート可能
+                2人以上でスタートできるよ
               </span>
             </div>
 
@@ -367,15 +372,15 @@ export default function LobbyPhase({
               }`}
             >
               <Play className="w-5 h-5 fill-current" />
-              <span>{players.length < 2 ? '参加者を待っています (2名〜)' : '全員そろったのでスタート！'}</span>
+              <span>{players.length < 2 ? 'みんなが集まるのを待っているよ (2人〜)' : '全員そろったからスタート！'}</span>
             </button>
           ) : (
             <div className="bg-blue-50 border border-blue-100 text-blue-800 p-4 rounded-2xl text-center space-y-1">
               <div className="flex items-center justify-center space-x-2">
                 <div className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
-                <p className="text-xs font-bold">ホストがゲームを開始するのを待っています…</p>
+                <p className="text-xs font-bold">ホストがスタートするのを待っているよ…</p>
               </div>
-              <p className="text-[11px] text-blue-600 font-medium">お題の回答準備をしておきましょう！</p>
+              <p className="text-[11px] text-blue-600 font-medium">回答のじゅんびをしておいてね！</p>
             </div>
           )}
 

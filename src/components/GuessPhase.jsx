@@ -18,20 +18,16 @@ export default function GuessPhase({
   const timeRemaining = gameState?.timeRemaining ?? 0;
   const votes = gameState?.votes || {};
 
-  // 現在対象になっているエピソードの作者ID（匿名）
   const currentEpisodeAuthorId = episodeOrder[currentIndex];
   const currentAnswerText = answers[currentEpisodeAuthorId] || '回答が送信されていません';
 
-  // 現在のエピソードへの投票一覧
   const currentVotes = votes[currentEpisodeAuthorId] || {};
   const votedVoterCount = Object.keys(currentVotes).length;
   const totalPlayers = players.length;
 
-  // 自分の投票状態
   const myVote = currentVotes[myPlayerId];
   const isMyVoteCompleted = !!myVote || hasVoted;
 
-  // エピソード切替時に入力リセット
   useEffect(() => {
     setSelectedGuessId(null);
     setHasVoted(false);
@@ -53,13 +49,13 @@ export default function GuessPhase({
             PHASE 2: 誰の文章でしょう？
           </span>
           <h2 className="text-xs font-bold text-slate-500 mt-1">
-            ピックアップ・エピソード <span className="text-purple-600 font-extrabold text-sm">(1件)</span>
+            えらばれたエピソード <span className="text-purple-600 font-extrabold text-sm">(1けん)</span>
           </h2>
         </div>
         <div className="flex items-center space-x-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-          <Clock className={`w-4 h-4 ${timeRemaining > 0 ? 'text-purple-600 animate-pulse' : 'text-rose-500'}`} />
+          <Clock className={`w-4 h-4 ${timeRemaining > 0 ? 'text-purple-600 animate-pulse' : 'text-slate-400'}`} />
           <span className="text-xs font-black font-mono text-slate-800">
-            {timeRemaining > 0 ? `${timeRemaining}秒` : '0秒 (投票受付中)'}
+            {timeRemaining > 0 ? `${timeRemaining}秒` : '0秒 (めやす)'}
           </span>
         </div>
       </div>
@@ -71,13 +67,13 @@ export default function GuessPhase({
         </div>
         <div className="relative z-10 space-y-3">
           <div className="inline-flex items-center space-x-1 text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
-            <Sparkles className="w-3.5 h-3.5" /> 匿名投稿エピソード
+            <Sparkles className="w-3.5 h-3.5" /> とくめいエピソード
           </div>
           <blockquote className="text-lg sm:text-xl font-extrabold text-slate-800 leading-relaxed tracking-tight bg-slate-50 p-4 rounded-2xl border border-slate-100">
             「{currentAnswerText}」
           </blockquote>
           <p className="text-[11px] text-slate-400 font-medium text-right">
-            ※誰が書いた文章か推測して投票してください
+            ※だれが書いた文章かあててね！
           </p>
         </div>
       </div>
@@ -86,10 +82,10 @@ export default function GuessPhase({
       <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-200/80 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-slate-600 flex items-center gap-1">
-            <UserCheck className="w-4 h-4 text-purple-500" /> 作者を推測して選択
+            <UserCheck className="w-4 h-4 text-purple-500" /> かいた人を予想してえらんでね
           </h3>
           <span className="text-[11px] font-bold text-purple-600 font-mono">
-            {votedVoterCount} / {totalPlayers}人完了
+            {votedVoterCount} / {totalPlayers}人かんりょう
           </span>
         </div>
 
@@ -127,19 +123,19 @@ export default function GuessPhase({
                   : 'bg-slate-200 text-slate-400 cursor-not-allowed'
               }`}
             >
-              <span>この人だと予想して投票する</span>
+              <span>この人だと予想してとうひょうする</span>
             </button>
           </div>
         ) : (
           /* 投票済みカード */
           <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center space-y-1.5">
             <p className="text-xs font-extrabold text-purple-900">
-              投票を完了しました！
+              とうひょうしたよ！
             </p>
             <p className="text-[11px] text-purple-700 font-medium">
               {votedVoterCount >= totalPlayers
-                ? '🎉 全員の投票が完了しました！ホストが結果発表を開くのを待っています…'
-                : 'ホストが結果発表を開くまでお待ちください…'}
+                ? '🎉 全員のとうひょうがおわったよ！ホストがけっかを開くのをまってね…'
+                : 'ホストがけっかを開くまでまっていてね…'}
             </p>
           </div>
         )}
@@ -151,7 +147,7 @@ export default function GuessPhase({
         <div className="pt-2 space-y-2">
           {votedVoterCount >= totalPlayers && (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3 rounded-2xl text-center animate-bounce-short">
-              🎉 全員の投票が完了しました！ボタンを押して結果発表を開いてください
+              🎉 全員のとうひょうがおわったよ！ボタンを押してけっかを開こう
             </div>
           )}
           <button
@@ -162,7 +158,7 @@ export default function GuessPhase({
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
             }`}
           >
-            <span>{votedVoterCount >= totalPlayers ? '🎉 結果発表を開く (ホスト操作)' : '結果発表へ進む (ホスト操作)'}</span>
+            <span>{votedVoterCount >= totalPlayers ? '🎉 けっか発表をひらく (ホスト)' : 'けっか発表をひらく (ホスト)'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
