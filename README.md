@@ -44,18 +44,30 @@
 
 ---
 
-## 📦 GitHub Pages へのデプロイ手順（完全サーバーレス公開）
+## 📦 Cloudflare Pages へのデプロイ手順（完全サーバーレス・爆速配信）
 
-自前サーバー不要のため、GitHub Pagesにデプロイするだけでどこからでもスマホで遊べるようになります。
+本アプリは自前サーバー不要の SPA（Single Page Application）なので、**Cloudflare Pages** と非常に相性が良く、完全無料で世界中に爆速公開できます。
 
-1. **GitHubリポジトリの設定**
-   - このリポジトリ (`https://github.com/kotesquares/EpWordWolf`) の Settings ➔ Pages を開く。
+### デプロイ手順
 
-2. **ビルド & 公開**
+1. **GitHubへコードをPush**
    ```bash
-   npm run build
+   git push -u origin main
    ```
-   生成された `dist` ディレクトリのファイルを GitHub Pages や Vercel, Netlify にアップロードします。
+
+2. **Cloudflare ダッシュボードに接続**
+   - [Cloudflare Dashboard](https://dash.cloudflare.com/) にログイン。
+   - 左メニューから **Workers & Pages** ➔ **作成 (Create)** ➔ **Pages** タブを開く。
+   - **「GitHubに接続 (Connect to GitHub)」** を選択し、リポジトリ `kotesquares/EpWordWolf` を選択。
+
+3. **ビルド設定**
+   - **フレームワーク プリセット**: `Vite`
+   - **ビルド コマンド**: `npm run build`
+   - **ビルド出力ディレクトリ**: `dist`
+
+4. **「保存してデプロイ」を実行**
+   - 数十秒でデプロイが完了し、`https://epwordwolf.pages.dev` のような公開URLが発行されます！
+   - 以降は GitHub に `git push` するだけで自動的に最新版へ更新されます。
 
 ---
 
