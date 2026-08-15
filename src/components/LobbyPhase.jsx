@@ -46,12 +46,15 @@ export default function LobbyPhase({
     localStorage.setItem('epww_player_name', name);
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleCreate = async () => {
     if (!playerName.trim()) {
       setErrorMsg('プレイヤー名を入力してください。');
       return;
     }
     setErrorMsg('');
+    setIsSubmitting(true);
     handleSaveName(playerName.trim());
     
     // ランダム4桁コード生成
@@ -60,6 +63,8 @@ export default function LobbyPhase({
       await onCreateRoom(playerName.trim(), code);
     } catch (err) {
       setErrorMsg(err.message || '部屋の作成に失敗しました');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -182,10 +187,15 @@ export default function LobbyPhase({
             <div className="space-y-3 pt-1">
               <button
                 onClick={handleCreate}
-                className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white font-extrabold py-3.5 rounded-2xl shadow-pop text-sm transition-all"
+                disabled={isSubmitting}
+                className={`w-full flex items-center justify-center space-x-2 font-extrabold py-3.5 rounded-2xl shadow-pop text-sm transition-all ${
+                  isSubmitting
+                    ? 'bg-slate-300 text-slate-500 cursor-wait'
+                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white'
+                }`}
               >
                 <PlusCircle className="w-5 h-5" />
-                <span>新しい部屋を作成してホストになる</span>
+                <span>{isSubmitting ? '部屋を作成中...' : '新しい部屋を作成してホストになる'}</span>
               </button>
               <p className="text-[11px] text-slate-400 text-center">
                 ※ホストもGMではなく一人のプレイヤーとして参加できます！

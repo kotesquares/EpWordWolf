@@ -66,6 +66,7 @@ export class PeerManager {
           this.state.scores[this.myPlayerId] = { total: 0, currentRound: 0, correctGuesses: 0, trickedOthers: 0 };
 
           this.setupHostListeners();
+          this.broadcastState();
           resolve({ roomCode: this.roomCode, playerId: this.myPlayerId });
         });
 
