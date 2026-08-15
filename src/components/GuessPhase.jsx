@@ -132,26 +132,37 @@ export default function GuessPhase({
           </div>
         ) : (
           /* 投票済みカード */
-          <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center space-y-2">
+          <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center space-y-1.5">
             <p className="text-xs font-extrabold text-purple-900">
               投票を完了しました！
             </p>
             <p className="text-[11px] text-purple-700 font-medium">
-              全員の投票が完了すると自動的に進みます
+              {votedVoterCount >= totalPlayers
+                ? '🎉 全員の投票が完了しました！ホストが結果発表を開くのを待っています…'
+                : 'ホストが結果発表を開くまでお待ちください…'}
             </p>
           </div>
         )}
 
       </div>
 
-      {/* ホスト専用：手動で結果発表へ進むボタン */}
+      {/* ホスト専用：結果発表へ進むボタン */}
       {isHost && (
-        <div className="pt-2">
+        <div className="pt-2 space-y-2">
+          {votedVoterCount >= totalPlayers && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3 rounded-2xl text-center animate-bounce-short">
+              🎉 全員の投票が完了しました！ボタンを押して結果発表を開いてください
+            </div>
+          )}
           <button
             onClick={onNextEpisode}
-            className="w-full flex items-center justify-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl text-xs transition-colors border border-slate-200"
+            className={`w-full flex items-center justify-center space-x-2 font-extrabold py-4 rounded-2xl text-sm transition-all ${
+              votedVoterCount >= totalPlayers
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 active:scale-[0.98] text-white shadow-pop animate-pulse'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+            }`}
           >
-            <span>全員の投票を待たずに結果発表へ進む（ホスト操作）</span>
+            <span>{votedVoterCount >= totalPlayers ? '🎉 結果発表を開く (ホスト操作)' : '結果発表へ進む (ホスト操作)'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

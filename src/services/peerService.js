@@ -207,15 +207,8 @@ export class PeerManager {
           this.state.votes[episodeAuthorId] = {};
         }
         this.state.votes[episodeAuthorId][voterId] = guessedAuthorId;
+        // 投票状況を保存・同期（全員が完了しても自動で結果画面へ行かず、ホストのボタン操作を待つ）
         this.broadcastState();
-
-        // 現在のエピソードに対して全員が投票完了したか判定
-        const currentAuthorId = this.state.episodeOrder[0];
-        const currentVotes = this.state.votes[currentAuthorId] || {};
-        if (Object.keys(currentVotes).length >= this.state.players.length) {
-          // 全員の投票完了 ➔ 結果発表へ
-          this.calculateScoresAndFinish();
-        }
         break;
       }
 
@@ -322,29 +315,13 @@ export class PeerManager {
     }
     this.state.votes[currentAuthorId][this.myPlayerId] = guessedAuthorId;
     this.broadcastState();
-
-    // 全員の投票が完了したら即ゲーム終了（結果発表へ）
-    const currentVotes = this.state.votes[currentAuthorId] || {};
-    if (Object.keys(currentVotes).length >= this.state.players.length) {
-  nextEpisode() {
-    if (!this.isHost) return;
-    this.advanceEpisodeOrFinish();
   }
 
-  advanceEpisodeOrFinish() {
+  // 手動で結果発表へ進む (Host操作)
+  nextEpisode() {
+    if (!this.isHost) return;
     this.stopTimer();
-
-    if (this.state.currentEpisodeIndex < this.state.episodeOrder.length - 1) {
-      this.state.currentEpisodeIndex += 1;
-      this.state.timeRemaining = 60;
-      this.startTimer(() => {
-        this.advanceEpisodeOrFinish();
-      });
-      this.broadcastState();
-    } else {
-      // 全エピソード推測終了 -> スコア集計 & Resultフェーズへ
-      this.calculateScoresAndFinish();
-    }
+    this.calculateScoresAndFinish();
   }
 
   calculateScoresAndFinish() {
