@@ -25,6 +25,10 @@ export default function App() {
 
     pm.onError = (errMsg) => {
       setGlobalError(errMsg);
+      // 離脱・エラー発生時はステートをクリアして最初の登録画面へ復帰
+      setGameState(null);
+      setMyPlayerId('');
+      setIsHost(false);
     };
 
     return () => {
@@ -56,7 +60,7 @@ export default function App() {
 
   const handleLeaveRoom = () => {
     if (peerManagerRef.current) {
-      peerManagerRef.current.disconnect();
+      peerManagerRef.current.leaveRoom();
     }
     setGameState(null);
     setMyPlayerId('');
@@ -121,15 +125,15 @@ export default function App() {
         onLeaveRoom={handleLeaveRoom}
       />
 
-      {/* エラー通知 */}
+      {/* アラート・メッセージ通知（離脱通知など） */}
       {globalError && (
-        <div className="bg-rose-600 text-white text-xs font-bold p-3 text-center flex items-center justify-center space-x-2 shadow-md z-40">
+        <div className="bg-rose-600 text-white text-xs font-bold p-3 text-center flex items-center justify-center space-x-2 shadow-md z-40 animate-fade-in">
           <span>{globalError}</span>
           <button
             onClick={() => setGlobalError('')}
             className="bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-[10px]"
           >
-            とじる
+            閉じる
           </button>
         </div>
       )}
@@ -186,7 +190,7 @@ export default function App() {
 
       {/* フッター */}
       <footer className="py-4 text-center text-[11px] text-slate-400 font-medium border-t border-slate-200/60 bg-white">
-        エピソード人狼 - 誰の文章でしょう？すいそくゲーム
+        エピソード人狼 - 誰の文章でしょう？推測ゲーム
       </footer>
 
     </div>

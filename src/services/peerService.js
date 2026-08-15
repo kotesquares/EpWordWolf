@@ -5,7 +5,7 @@ const PEER_PREFIX = 'ep-wordwolf-room-v1-';
 export class PeerManager {
   constructor() {
     this.peer = null;
-    this.connections = new Map(); // host: guestPeerId -> DataConnection
+    this.connections = new Map(); // host: guestPlayerId -> DataConnection
     this.hostConnection = null;   // guest: DataConnection to Host
     this.isHost = false;
     this.myPlayerId = null;
@@ -137,7 +137,6 @@ export class PeerManager {
 
         this.peer.on('error', (err) => {
           console.error('Peer error on guest:', err);
-          // 英語のログ(err.message)を隠して日本語だけで分かりやすく伝える
           reject(new Error('部屋が見つからなかったよ！部屋コードを確かめてね。'));
         });
       } catch (e) {
@@ -188,6 +187,12 @@ export class PeerManager {
         break;
       }
 
+      case 'LEAVE_ROOM': {
+        const { playerId } = data;
+        this.handlePlayerLeave(playerId);
+        break;
+      }
+
       case 'SUBMIT_ANSWER': {
         const { playerId, answer } = data;
         this.state.answers[playerId] = answer;
@@ -222,17 +227,44 @@ export class PeerManager {
   }
 
   handleGuestDisconnect(peerId) {
+    let disconnectedPlayerId = null;
     for (const [playerId, conn] of this.connections.entries()) {
       if (conn.peer === peerId) {
-        const player = this.state.players.find(p => p.id === playerId);
-        if (player) {
-          player.isConnected = false;
-        }
-        this.connections.delete(playerId);
+        disconnectedPlayerId = playerId;
         break;
       }
     }
-    this.broadcastState();
+    if (disconnectedPlayerId) {
+      this.handlePlayerLeave(disconnectedPlayerId);
+    }
+  }
+
+  // プレイヤー離脱時の処理（ゲーム中なら全員強制終了して初期画面へ戻す）
+  handlePlayerLeave(playerId) {
+    const leavingPlayer = this.state.players.find(p => p.id === playerId);
+    const playerName = leavingPlayer ? leavingPlayer.name : 'メンバー';
+
+    // プレイヤーを削除
+    this.state.players = this.state.players.filter(p => p.id !== playerId);
+    this.connections.delete(playerId);
+
+    const message = `${playerName}さんが部屋を抜けたため、ゲームを終了したよ！`;
+
+    // 全員にゲーム中止を通知
+    for (const conn of this.connections.values()) {
+      if (conn.open) {
+        conn.send({
+          type: 'GAME_ABORTED',
+          reason: message,
+        });
+      }
+    }
+
+    // ホスト自身もゲーム中断エラーを通知してリセット
+    if (this.onError) {
+      this.onError(message);
+    }
+    this.disconnect();
   }
 
   // --- HOST GAME CONTROLS ---
@@ -405,6 +437,27 @@ export class PeerManager {
     }
   }
 
+  // 明示的な退室通知
+  leaveRoom() {
+    if (this.isHost) {
+      const message = 'ホストが部屋を抜けたため、ゲームを終了したよ！';
+      for (const conn of this.connections.values()) {
+        if (conn.open) {
+          conn.send({
+            type: 'GAME_ABORTED',
+            reason: message,
+          });
+        }
+      }
+    } else if (this.hostConnection && this.hostConnection.open) {
+      this.hostConnection.send({
+        type: 'LEAVE_ROOM',
+        playerId: this.myPlayerId,
+      });
+    }
+    this.disconnect();
+  }
+
   // --- GUEST LISTENERS ---
 
   setupGuestListeners(conn) {
@@ -414,14 +467,20 @@ export class PeerManager {
         if (this.onStateUpdate) {
           this.onStateUpdate(this.state);
         }
+      } else if (data.type === 'GAME_ABORTED') {
+        if (this.onError) {
+          this.onError(data.reason || 'メンバーが部屋を抜けたため、ゲームを終了したよ！');
+        }
+        this.disconnect();
       }
     });
 
     conn.on('close', () => {
       console.log('Host connection closed');
       if (this.onError) {
-        this.onError('ホストとの接続が切れたよ！');
+        this.onError('ホストとの接続が切れたため、ゲームを終了したよ！');
       }
+      this.disconnect();
     });
   }
 
@@ -471,7 +530,10 @@ export class PeerManager {
     this.stopTimer();
     if (this.peer) {
       this.peer.destroy();
+      this.peer = null;
     }
+    this.connections.clear();
+    this.hostConnection = null;
     this.state = {
       phase: 'LOBBY',
       roomCode: '',
