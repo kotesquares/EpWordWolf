@@ -49,13 +49,13 @@ export default function GuessPhase({
             PHASE 2: 誰の文章でしょう？
           </span>
           <h2 className="text-xs font-bold text-slate-500 mt-1">
-            えらばれたエピソード <span className="text-purple-600 font-extrabold text-sm">(1けん)</span>
+            選ばれたエピソード <span className="text-purple-600 font-extrabold text-sm">(1件)</span>
           </h2>
         </div>
         <div className="flex items-center space-x-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
           <Clock className={`w-4 h-4 ${timeRemaining > 0 ? 'text-purple-600 animate-pulse' : 'text-slate-400'}`} />
           <span className="text-xs font-black font-mono text-slate-800">
-            {timeRemaining > 0 ? `${timeRemaining}秒` : '0秒 (めやす)'}
+            {timeRemaining > 0 ? `${timeRemaining}秒` : '0秒 (目安)'}
           </span>
         </div>
       </div>
@@ -67,13 +67,13 @@ export default function GuessPhase({
         </div>
         <div className="relative z-10 space-y-3">
           <div className="inline-flex items-center space-x-1 text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
-            <Sparkles className="w-3.5 h-3.5" /> とくめいエピソード
+            <Sparkles className="w-3.5 h-3.5" /> 匿名エピソード
           </div>
           <blockquote className="text-lg sm:text-xl font-extrabold text-slate-800 leading-relaxed tracking-tight bg-slate-50 p-4 rounded-2xl border border-slate-100">
             「{currentAnswerText}」
           </blockquote>
           <p className="text-[11px] text-slate-400 font-medium text-right">
-            ※だれが書いた文章かあててね！
+            ※誰が書いた文章か当ててね！
           </p>
         </div>
       </div>
@@ -82,10 +82,10 @@ export default function GuessPhase({
       <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-200/80 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold text-slate-600 flex items-center gap-1">
-            <UserCheck className="w-4 h-4 text-purple-500" /> かいた人を予想してえらんでね
+            <UserCheck className="w-4 h-4 text-purple-500" /> 書いた人を予想して選んでね
           </h3>
           <span className="text-[11px] font-bold text-purple-600 font-mono">
-            {votedVoterCount} / {totalPlayers}人かんりょう
+            {votedVoterCount} / {totalPlayers}人完了
           </span>
         </div>
 
@@ -123,19 +123,19 @@ export default function GuessPhase({
                   : 'bg-slate-200 text-slate-400 cursor-not-allowed'
               }`}
             >
-              <span>この人だと予想してとうひょうする</span>
+              <span>この人だと予想して投票する</span>
             </button>
           </div>
         ) : (
           /* 投票済みカード */
           <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center space-y-1.5">
             <p className="text-xs font-extrabold text-purple-900">
-              とうひょうしたよ！
+              投票したよ！
             </p>
             <p className="text-[11px] text-purple-700 font-medium">
               {votedVoterCount >= totalPlayers
-                ? '🎉 全員のとうひょうがおわったよ！ホストがけっかを開くのをまってね…'
-                : 'ホストがけっかを開くまでまっていてね…'}
+                ? '🎉 全員の投票が終わったよ！ホストが結果を開くのを待ってね…'
+                : 'ホストが結果を開くまで待っていてね…'}
             </p>
           </div>
         )}
@@ -147,7 +147,7 @@ export default function GuessPhase({
         <div className="pt-2 space-y-2">
           {votedVoterCount >= totalPlayers && (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3 rounded-2xl text-center animate-bounce-short">
-              🎉 全員のとうひょうがおわったよ！ボタンを押してけっかを開こう
+              🎉 全員の投票が終わったよ！ボタンを押して結果を開こう
             </div>
           )}
           <button
@@ -158,7 +158,7 @@ export default function GuessPhase({
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
             }`}
           >
-            <span>{votedVoterCount >= totalPlayers ? '🎉 けっか発表をひらく (ホスト)' : 'けっか発表をひらく (ホスト)'}</span>
+            <span>{votedVoterCount >= totalPlayers ? '🎉 結果発表を開く (ホスト)' : '結果発表を開く (ホスト)'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

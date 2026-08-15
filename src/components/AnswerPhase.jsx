@@ -28,14 +28,14 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
       <div className="bg-white rounded-3xl p-5 shadow-soft border border-slate-200/80 flex items-center justify-between">
         <div>
           <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            PHASE 1: エピソードをかくよ
+            PHASE 1: エピソードを書くよ
           </span>
           <h2 className="text-xs font-bold text-slate-500 mt-1">お題への回答を書いてね</h2>
         </div>
         <div className="flex items-center space-x-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
           <Clock className={`w-4 h-4 ${timeRemaining > 0 ? 'text-blue-600 animate-pulse' : 'text-slate-400'}`} />
           <span className="text-xs font-black font-mono text-slate-800">
-            {timeRemaining > 0 ? `${timeRemaining}秒` : '0秒 (めやす)'}
+            {timeRemaining > 0 ? `${timeRemaining}秒` : '0秒 (目安)'}
           </span>
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
             「{topic}」
           </p>
           <p className="text-[11px] text-blue-100/80">
-            ※じぶんの回答だとバレないように書き方をくふうしてね！
+            ※自分の回答だとバレないように書き方を工夫してね！
           </p>
         </div>
       </div>
@@ -68,7 +68,7 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
               onChange={(e) => setAnswerText(e.target.value)}
               rows={4}
               maxLength={150}
-              placeholder="ここに文章を書いてね（例：むかし修学旅行で大失敗をして…）"
+              placeholder="ここに文章を書いてね（例：昔修学旅行で大失敗をして…）"
               className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none placeholder:font-normal placeholder:text-slate-400"
             />
             <div className="text-right text-[11px] text-slate-400 font-bold mt-1">
@@ -86,7 +86,7 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
             }`}
           >
             <Send className="w-4 h-4" />
-            <span>匿名でおくるよ</span>
+            <span>匿名で送るよ</span>
           </button>
         </form>
       ) : (
@@ -96,10 +96,10 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
             <CheckCircle2 className="w-7 h-7" />
           </div>
           <h3 className="text-base font-extrabold text-emerald-900">
-            回答をおくったよ！
+            回答を送ったよ！
           </h3>
           <p className="text-xs text-emerald-700 font-medium max-w-xs mx-auto">
-            みんなの回答があつまるまでまっていてね。
+            みんなの回答が集まるまで待っていてね。
           </p>
         </div>
       )}
@@ -108,7 +108,7 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
       <div className="bg-white rounded-3xl p-5 shadow-soft border border-slate-200/80 space-y-3">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className="text-slate-600">みんなの回答状況</span>
-          <span className="text-blue-600 font-mono font-black">{submittedCount} / {totalPlayers}人かんりょう</span>
+          <span className="text-blue-600 font-mono font-black">{submittedCount} / {totalPlayers}人完了</span>
         </div>
 
         {/* プログレスバー */}
