@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Trophy, RefreshCw, Sparkles, CheckCircle2, UserX, Crown, Target, Flame } from 'lucide-react';
+import { Trophy, RefreshCw, Sparkles, CheckCircle2, UserX, Crown, Target, Flame, HelpCircle } from 'lucide-react';
 
 export default function ResultPhase({
   gameState,
@@ -224,6 +224,22 @@ export default function ResultPhase({
             );
           })}
         </div>
+
+        {/* 控えめな配点ルールガイド */}
+        <div className="pt-2 border-t border-slate-100">
+          <div className="bg-slate-50/80 rounded-2xl p-3 border border-slate-200/60 text-[11px] text-slate-500 space-y-1">
+            <div className="font-bold text-slate-600 flex items-center gap-1">
+              <HelpCircle className="w-3.5 h-3.5 text-slate-400" /> 配点ルール
+            </div>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 gap-y-0.5 pl-1 font-medium text-[10.5px]">
+              <li>🎯 <strong>作者を見破る:</strong> +100pt</li>
+              <li>😈 <strong>他人をだます:</strong> +50pt / 人</li>
+              <li>👑 <strong>全員をだます:</strong> ボーナス +100pt</li>
+              <li className="text-slate-400">※自分への投票は得点・だまし対象外</li>
+            </ul>
+          </div>
+        </div>
+
       </div>
 
       {/* ホスト専用：再スタートボタン */}
