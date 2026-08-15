@@ -112,6 +112,12 @@ export default function App() {
     }
   };
 
+  const handleStartGuess = () => {
+    if (peerManagerRef.current && isHost) {
+      peerManagerRef.current.startGuessPhase();
+    }
+  };
+
   const currentPhase = gameState?.phase || 'LOBBY';
 
   return (
@@ -156,7 +162,9 @@ export default function App() {
           <AnswerPhase
             gameState={gameState}
             myPlayerId={myPlayerId}
+            isHost={isHost}
             onSubmitAnswer={handleSubmitAnswer}
+            onStartGuess={handleStartGuess}
           />
         )}
 

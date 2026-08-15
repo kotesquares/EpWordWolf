@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, Clock, MessageSquare } from 'lucide-react';
+import { Send, CheckCircle2, Clock, MessageSquare, ArrowRight } from 'lucide-react';
 
-export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
+export default function AnswerPhase({
+  gameState,
+  myPlayerId,
+  isHost,
+  onSubmitAnswer,
+  onStartGuess,
+}) {
   const [answerText, setAnswerText] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
@@ -140,6 +146,35 @@ export default function AnswerPhase({ gameState, myPlayerId, onSubmitAnswer }) {
           })}
         </div>
       </div>
+
+      {/* ホスト専用：推測フェーズ（匿名読み上げ）を開始するボタン */}
+      {isHost && (
+        <div className="pt-2 space-y-2">
+          {submittedCount >= totalPlayers && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3 rounded-2xl text-center animate-bounce-short">
+              🎉 全員の回答が集まったよ！ボタンを押して回答当てを始めよう
+            </div>
+          )}
+          <button
+            onClick={onStartGuess}
+            disabled={submittedCount === 0}
+            className={`w-full flex items-center justify-center space-x-2 font-extrabold py-4 rounded-2xl text-sm transition-all ${
+              submittedCount >= totalPlayers
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white shadow-pop animate-pulse'
+                : submittedCount > 0
+                ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
+                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+            }`}
+          >
+            <span>
+              {submittedCount >= totalPlayers
+                ? '🎉 全員そろったよ！推測を始める (ホスト)'
+                : '回答を締め切って推測を始める (ホスト)'}
+            </span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
     </div>
   );
