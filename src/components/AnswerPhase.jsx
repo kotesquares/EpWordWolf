@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, CheckCircle2, Clock, MessageSquare, ArrowRight, Sparkles } from 'lucide-react';
+import { Send, CheckCircle2, Clock, MessageSquare, ArrowRight, Sparkles, RotateCcw } from 'lucide-react';
 
 export default function AnswerPhase({
   gameState,
@@ -7,6 +7,7 @@ export default function AnswerPhase({
   isHost,
   onSubmitAnswer,
   onStartGuess,
+  onResetToLobby,
 }) {
   const [answerText, setAnswerText] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -152,9 +153,9 @@ export default function AnswerPhase({
         </div>
       </div>
 
-      {/* ホスト専用：手動スタートボタン */}
+      {/* ホスト専用：手動スタートボタン ＆ お題決めなおしボタン */}
       {isHost && (
-        <div className="pt-2 space-y-2">
+        <div className="pt-2 space-y-2.5">
           {submittedCount >= totalPlayers && (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3 rounded-2xl text-center animate-bounce-short">
               🎉 全員の回答が集まったよ！
@@ -177,6 +178,19 @@ export default function AnswerPhase({
                 : '回答を締め切って推測を始める (ホスト)'}
             </span>
             <ArrowRight className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm('お題を決めなおすよ。ロビーに戻ってもいいかな？')) {
+                onResetToLobby();
+              }
+            }}
+            className="w-full flex items-center justify-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-3 rounded-2xl text-xs transition-colors border border-slate-200/80 active:scale-[0.98]"
+          >
+            <RotateCcw className="w-4 h-4 text-slate-500" />
+            <span>お題を決めなおす (ロビーに戻る)</span>
           </button>
         </div>
       )}

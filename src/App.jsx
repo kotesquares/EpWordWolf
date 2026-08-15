@@ -165,6 +165,7 @@ export default function App() {
             isHost={isHost}
             onSubmitAnswer={handleSubmitAnswer}
             onStartGuess={handleStartGuess}
+            onResetToLobby={handleRestart}
           />
         )}
 
