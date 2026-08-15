@@ -1,0 +1,160 @@
+import React, { useState, useEffect } from 'react';
+import { HelpCircle, Check, Clock, Sparkles, UserCheck, ArrowRight } from 'lucide-react';
+
+export default function GuessPhase({
+  gameState,
+  myPlayerId,
+  isHost,
+  onSubmitVote,
+  onNextEpisode,
+}) {
+  const [selectedGuessId, setSelectedGuessId] = useState(null);
+  const [hasVoted, setHasVoted] = useState(false);
+
+  const players = gameState?.players || [];
+  const answers = gameState?.answers || {};
+  const episodeOrder = gameState?.episodeOrder || [];
+  const currentIndex = gameState?.currentEpisodeIndex ?? 0;
+  const timeRemaining = gameState?.timeRemaining ?? 0;
+  const votes = gameState?.votes || {};
+
+  // 現在対象になっているエピソードの作者ID（匿名）
+  const currentEpisodeAuthorId = episodeOrder[currentIndex];
+  const currentAnswerText = answers[currentEpisodeAuthorId] || '回答が送信されていません';
+
+  // 現在のエピソードへの投票一覧
+  const currentVotes = votes[currentEpisodeAuthorId] || {};
+  const votedVoterCount = Object.keys(currentVotes).length;
+  const totalPlayers = players.length;
+
+  // 自分の投票状態
+  const myVote = currentVotes[myPlayerId];
+  const isMyVoteCompleted = !!myVote || hasVoted;
+
+  // エピソード切替時に入力リセット
+  useEffect(() => {
+    setSelectedGuessId(null);
+    setHasVoted(false);
+  }, [currentIndex]);
+
+  const handleVoteSubmit = () => {
+    if (!selectedGuessId) return;
+    onSubmitVote(selectedGuessId);
+    setHasVoted(true);
+  };
+
+  return (
+    <div className="max-w-xl mx-auto px-4 py-6 space-y-6 animate-fade-in">
+      
+      {/* 画面ヘッダー ＆ 進捗 */}
+      <div className="bg-white rounded-3xl p-5 shadow-soft border border-slate-200/80 flex items-center justify-between">
+        <div>
+          <span className="text-[10px] font-extrabold bg-purple-100 text-purple-700 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            PHASE 2: 誰の文章でしょう？
+          </span>
+          <h2 className="text-xs font-bold text-slate-500 mt-1">
+            エピソード <span className="text-purple-600 font-extrabold text-sm">{currentIndex + 1}</span> / {episodeOrder.length}
+          </h2>
+        </div>
+        <div className="flex items-center space-x-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+          <Clock className="w-4 h-4 text-purple-600 animate-pulse" />
+          <span className="text-xs font-black font-mono text-slate-800">{timeRemaining}秒</span>
+        </div>
+      </div>
+
+      {/* 匿名エピソード読み上げカード */}
+      <div className="bg-white rounded-3xl p-6 shadow-pop border border-slate-200 space-y-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 text-purple-100">
+          <HelpCircle className="w-16 h-16 opacity-30" />
+        </div>
+        <div className="relative z-10 space-y-3">
+          <div className="inline-flex items-center space-x-1 text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
+            <Sparkles className="w-3.5 h-3.5" /> 匿名投稿エピソード
+          </div>
+          <blockquote className="text-lg sm:text-xl font-extrabold text-slate-800 leading-relaxed tracking-tight bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            「{currentAnswerText}」
+          </blockquote>
+          <p className="text-[11px] text-slate-400 font-medium text-right">
+            ※誰が書いた文章か推測して投票してください
+          </p>
+        </div>
+      </div>
+
+      {/* 推測投票セクション */}
+      <div className="bg-white rounded-3xl p-6 shadow-soft border border-slate-200/80 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold text-slate-600 flex items-center gap-1">
+            <UserCheck className="w-4 h-4 text-purple-500" /> 作者を推測して選択
+          </h3>
+          <span className="text-[11px] font-bold text-purple-600 font-mono">
+            {votedVoterCount} / {totalPlayers}人完了
+          </span>
+        </div>
+
+        {!isMyVoteCompleted ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-2.5">
+              {players.map((p) => {
+                const isSelected = selectedGuessId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setSelectedGuessId(p.id)}
+                    className={`p-3.5 rounded-2xl border flex items-center space-x-2.5 transition-all text-left ${
+                      isSelected
+                        ? 'bg-purple-50 border-purple-400 ring-2 ring-purple-500/20 shadow-sm'
+                        : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-full ${p.avatarColor || 'bg-purple-500'} flex items-center justify-center text-white font-extrabold text-xs flex-shrink-0`}>
+                      {p.name.charAt(0)}
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 truncate flex-1">{p.name}</span>
+                    {isSelected && <Check className="w-4 h-4 text-purple-600 flex-shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={handleVoteSubmit}
+              disabled={!selectedGuessId}
+              className={`w-full flex items-center justify-center space-x-2 font-extrabold py-3.5 rounded-2xl text-sm transition-all ${
+                selectedGuessId
+                  ? 'bg-purple-600 hover:bg-purple-700 active:scale-[0.98] text-white shadow-pop'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              }`}
+            >
+              <span>この人だと予想して投票する</span>
+            </button>
+          </div>
+        ) : (
+          /* 投票済みカード */
+          <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center space-y-2">
+            <p className="text-xs font-extrabold text-purple-900">
+              投票を完了しました！
+            </p>
+            <p className="text-[11px] text-purple-700 font-medium">
+              全員の投票が完了すると自動的に進みます
+            </p>
+          </div>
+        )}
+
+      </div>
+
+      {/* ホスト専用：スキップ・手動次へボタン */}
+      {isHost && (
+        <div className="pt-2">
+          <button
+            onClick={onNextEpisode}
+            className="w-full flex items-center justify-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl text-xs transition-colors border border-slate-200"
+          >
+            <span>全員の投票を待たずに次へ（ホスト操作）</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+    </div>
+  );
+}
