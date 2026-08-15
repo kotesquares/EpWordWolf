@@ -20,7 +20,7 @@ export class PeerManager {
       phase: 'LOBBY', // LOBBY, ANSWERING, GUESSING, RESULT
       roomCode: '',
       hostId: '',
-      topic: 'もし1億円が手に入ったら何に使いたい？',
+      topic: '', // ホストが「お題決定」ボタンを押して初めて配信される
       timeLimit: 120, // 秒
       timeRemaining: 120,
       timerActive: false,

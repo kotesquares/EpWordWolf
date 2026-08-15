@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dices, Play, Users, Clock, Sparkles, LogIn, PlusCircle, Shuffle } from 'lucide-react';
+import { Dices, Play, Users, Clock, Sparkles, LogIn, PlusCircle, Shuffle, CheckCircle2 } from 'lucide-react';
 import { TOPIC_CATEGORIES, getRandomTopic } from '../data/topics';
 
 export default function LobbyPhase({
@@ -21,6 +21,7 @@ export default function LobbyPhase({
   const [isJoiningMode, setIsJoiningMode] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTopicConfirmed, setIsTopicConfirmed] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -31,14 +32,15 @@ export default function LobbyPhase({
     }
   }, []);
 
+  // ゲスト向けお題同期
   useEffect(() => {
-    if (gameState?.topic) {
+    if (gameState?.topic && !isHost) {
       setTopicInput(gameState.topic);
     }
     if (gameState?.timeLimit) {
       setTimeLimitSelect(gameState.timeLimit);
     }
-  }, [gameState?.topic, gameState?.timeLimit]);
+  }, [gameState?.topic, gameState?.timeLimit, isHost]);
 
   const handleSaveName = (name) => {
     setPlayerName(name);
@@ -89,16 +91,21 @@ export default function LobbyPhase({
   const handleGacha = () => {
     const newTopic = getRandomTopic(selectedCategory);
     setTopicInput(newTopic);
-    if (isHost) {
-      onUpdateSettings(newTopic, timeLimitSelect);
-    }
+    setIsTopicConfirmed(false);
   };
 
   const handleTopicChange = (e) => {
     const val = e.target.value;
     setTopicInput(val);
+    setIsTopicConfirmed(false);
+  };
+
+  // お題決定ボタン
+  const handleConfirmTopic = () => {
+    if (!topicInput.trim()) return;
     if (isHost) {
-      onUpdateSettings(val, timeLimitSelect);
+      onUpdateSettings(topicInput.trim(), timeLimitSelect);
+      setIsTopicConfirmed(true);
     }
   };
 
@@ -107,6 +114,17 @@ export default function LobbyPhase({
     setTimeLimitSelect(val);
     if (isHost) {
       onUpdateSettings(topicInput, val);
+    }
+  };
+
+  const handleStartGameWithConfirm = () => {
+    if (isHost) {
+      // 未決定なら決定してからスタート
+      if (!isTopicConfirmed) {
+        onUpdateSettings(topicInput.trim(), timeLimitSelect);
+        setIsTopicConfirmed(true);
+      }
+      onStartGame();
     }
   };
 
@@ -245,7 +263,7 @@ export default function LobbyPhase({
               </span>
               {isHost && (
                 <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-full">
-                  ホストが変更できるよ
+                  ホストが設定中
                 </span>
               )}
             </div>
@@ -287,13 +305,37 @@ export default function LobbyPhase({
                     <span>ランダムでお題をひくよ</span>
                   </button>
                 </div>
+
+                {/* お題決定ボタン */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={handleConfirmTopic}
+                    className={`w-full flex items-center justify-center space-x-1.5 py-3 rounded-2xl text-xs font-extrabold transition-all ${
+                      isTopicConfirmed
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md active:scale-[0.98]'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{isTopicConfirmed ? 'お題をみんなに決定・送信したよ！' : 'このお題に決定して他のみんなに見せる'}</span>
+                  </button>
+                </div>
+
               </div>
             ) : (
-              /* ゲスト閲覧用 */
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 p-4 rounded-2xl text-center">
-                <p className="text-base font-extrabold text-blue-950 leading-snug">
-                  「{gameState.topic}」
-                </p>
+              /* ゲスト閲覧用：ホストがお題決定ボタンを押すまで内緒に表示 */
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 p-4 rounded-2xl text-center space-y-1">
+                {gameState?.topic ? (
+                  <p className="text-base font-extrabold text-blue-950 leading-snug">
+                    「{gameState.topic}」
+                  </p>
+                ) : (
+                  <div className="py-2 text-slate-500 text-xs font-bold flex items-center justify-center space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
+                    <span>ホストがお題を選んでいるよ…お楽しみに！</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -362,7 +404,7 @@ export default function LobbyPhase({
           {/* ゲーム開始アクションボタン */}
           {isHost ? (
             <button
-              onClick={onStartGame}
+              onClick={handleStartGameWithConfirm}
               disabled={players.length < 2}
               className={`w-full flex items-center justify-center space-x-2 font-black py-4 rounded-2xl text-base shadow-pop transition-all ${
                 players.length >= 2
