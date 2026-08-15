@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dices, Play, Users, Clock, Sparkles, LogIn, PlusCircle, Shuffle, CheckCircle2 } from 'lucide-react';
+import { Dices, Play, Users, Clock, Sparkles, LogIn, PlusCircle, Shuffle, CheckCircle2, RotateCcw } from 'lucide-react';
 import { TOPIC_CATEGORIES, getRandomTopic } from '../data/topics';
 
 export default function LobbyPhase({
@@ -114,6 +114,15 @@ export default function LobbyPhase({
     setTimeLimitSelect(val);
     if (isHost) {
       onUpdateSettings(topicInput, val);
+    }
+  };
+
+  // お題再決定ボタン
+  const handleResetTopic = () => {
+    setIsTopicConfirmed(false);
+    setTopicInput('');
+    if (isHost) {
+      onUpdateSettings('', timeLimitSelect);
     }
   };
 
@@ -403,18 +412,29 @@ export default function LobbyPhase({
 
           {/* ゲーム開始アクションボタン */}
           {isHost ? (
-            <button
-              onClick={handleStartGameWithConfirm}
-              disabled={players.length < 2}
-              className={`w-full flex items-center justify-center space-x-2 font-black py-4 rounded-2xl text-base shadow-pop transition-all ${
-                players.length >= 2
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white'
-                  : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-              }`}
-            >
-              <Play className="w-5 h-5 fill-current" />
-              <span>{players.length < 2 ? 'みんなが集まるのを待っているよ (2人〜)' : '全員そろったからスタート！'}</span>
-            </button>
+            <div className="space-y-2.5">
+              <button
+                onClick={handleStartGameWithConfirm}
+                disabled={players.length < 2}
+                className={`w-full flex items-center justify-center space-x-2 font-black py-4 rounded-2xl text-base shadow-pop transition-all ${
+                  players.length >= 2
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white'
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                }`}
+              >
+                <Play className="w-5 h-5 fill-current" />
+                <span>{players.length < 2 ? 'みんなが集まるのを待っているよ (2人〜)' : '全員そろったからスタート！'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetTopic}
+                className="w-full flex items-center justify-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-3 rounded-2xl text-xs transition-colors border border-slate-200/80 active:scale-[0.98]"
+              >
+                <RotateCcw className="w-4 h-4 text-slate-500" />
+                <span>もう一度お題を決めなおす</span>
+              </button>
+            </div>
           ) : (
             <div className="bg-blue-50 border border-blue-100 text-blue-800 p-4 rounded-2xl text-center space-y-1">
               <div className="flex items-center justify-center space-x-2">
