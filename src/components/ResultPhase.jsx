@@ -56,8 +56,8 @@ export default function ResultPhase({
           const author = players.find(p => p.id === authorId);
           const episodeVotes = votes[authorId] || {};
 
-          // 正解した人数と騙された人数
-          const correctVoters = Object.entries(episodeVotes).filter(([voterId, guessedId]) => guessedId === authorId);
+          // 見破った他プレイヤーの人数と、騙された他プレイヤーの人数
+          const correctVoters = Object.entries(episodeVotes).filter(([voterId, guessedId]) => voterId !== authorId && guessedId === authorId);
           const trickedVoters = Object.entries(episodeVotes).filter(([voterId, guessedId]) => voterId !== authorId && guessedId !== authorId);
 
           return (
@@ -114,13 +114,16 @@ export default function ResultPhase({
                     {Object.entries(episodeVotes).map(([voterId, guessedId]) => {
                       const voter = players.find(p => p.id === voterId);
                       const guessed = players.find(p => p.id === guessedId);
+                      const isSelfVote = voterId === authorId;
                       const isCorrect = guessedId === authorId;
 
                       return (
                         <div
                           key={voterId}
                           className={`p-3 rounded-2xl flex items-center justify-between border transition-all ${
-                            isCorrect
+                            isSelfVote
+                              ? 'bg-slate-100 border-slate-200 text-slate-600 opacity-80'
+                              : isCorrect
                               ? 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-sm'
                               : 'bg-rose-50/70 border-rose-200 text-rose-950'
                           }`}
@@ -134,7 +137,11 @@ export default function ResultPhase({
 
                           <div className="flex items-center space-x-1.5 text-xs font-bold">
                             <span className="text-[11px] opacity-75">➔ {guessed?.name}</span>
-                            {isCorrect ? (
+                            {isSelfVote ? (
+                              <span className="bg-slate-200 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                自分の投票 (対象外)
+                              </span>
+                            ) : isCorrect ? (
                               <span className="bg-emerald-600 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                                 <CheckCircle2 className="w-3 h-3" /> 見破り成功！
                               </span>

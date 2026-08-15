@@ -354,32 +354,36 @@ export class PeerManager {
     Object.keys(votes).forEach(authorId => {
       const episodeVotes = votes[authorId] || {};
       let totalOtherVoters = 0;
-      let correctCount = 0;
+      let correctOtherCount = 0;
 
       Object.entries(episodeVotes).forEach(([voterId, guessedId]) => {
-        if (guessedId === authorId) {
-          if (this.state.scores[voterId]) {
-            this.state.scores[voterId].currentRound += 100;
-            this.state.scores[voterId].correctGuesses += 1;
-            this.state.scores[voterId].roundCorrect = (this.state.scores[voterId].roundCorrect || 0) + 1;
-          }
-          if (voterId !== authorId) {
-            correctCount++;
-          }
-        } else {
-          if (voterId !== authorId && this.state.scores[authorId]) {
-            this.state.scores[authorId].currentRound += 50;
-            this.state.scores[authorId].trickedOthers += 1;
-            this.state.scores[authorId].roundTricked = (this.state.scores[authorId].roundTricked || 0) + 1;
-          }
-        }
+        const isSelfVote = voterId === authorId;
 
-        if (voterId !== authorId) {
+        // ★他プレイヤーからの投票のみを「見破り」「騙し」の評価対象にする！
+        if (!isSelfVote) {
           totalOtherVoters++;
+
+          if (guessedId === authorId) {
+            // 他人が作者を見破った ➔ 投票者に「見破りポイント +100pt」
+            if (this.state.scores[voterId]) {
+              this.state.scores[voterId].currentRound += 100;
+              this.state.scores[voterId].correctGuesses += 1;
+              this.state.scores[voterId].roundCorrect = (this.state.scores[voterId].roundCorrect || 0) + 1;
+            }
+            correctOtherCount++;
+          } else {
+            // 他人が作者を見破れず騙された ➔ 作者に「騙しポイント +50pt」
+            if (this.state.scores[authorId]) {
+              this.state.scores[authorId].currentRound += 50;
+              this.state.scores[authorId].trickedOthers += 1;
+              this.state.scores[authorId].roundTricked = (this.state.scores[authorId].roundTricked || 0) + 1;
+            }
+          }
         }
       });
 
-      if (totalOtherVoters > 0 && correctCount === 0 && this.state.scores[authorId]) {
+      // 他プレイヤー全員を騙せた場合 ➔ 作者に「完全隠蔽ボーナス +100pt」
+      if (totalOtherVoters > 0 && correctOtherCount === 0 && this.state.scores[authorId]) {
         this.state.scores[authorId].currentRound += 100;
       }
     });
