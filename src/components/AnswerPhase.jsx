@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Send, CheckCircle2, Clock, MessageSquare, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Send, CheckCircle2, Clock, MessageSquare, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function AnswerPhase({
   gameState,
@@ -10,15 +10,22 @@ export default function AnswerPhase({
 }) {
   const [answerText, setAnswerText] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [showHostDialog, setShowHostDialog] = useState(false);
 
   const topic = gameState?.topic || '';
   const players = gameState?.players || [];
   const answers = gameState?.answers || {};
-  const timeRemaining = gameState?.timeRemaining ?? 0;
 
   const submittedCount = Object.keys(answers).length;
   const totalPlayers = players.length;
   const isMyAnswerSubmitted = !!answers[myPlayerId] || hasSubmitted;
+
+  // ホストで全員の回答が揃った瞬間、ダイアログを自動表示
+  useEffect(() => {
+    if (isHost && submittedCount >= totalPlayers && totalPlayers > 0) {
+      setShowHostDialog(true);
+    }
+  }, [isHost, submittedCount, totalPlayers]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -28,9 +35,9 @@ export default function AnswerPhase({
   };
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 space-y-6 animate-fade-in">
+    <div className="max-w-xl mx-auto px-4 py-6 space-y-6 animate-fade-in relative">
       
-      {/* 画面ヘッダー ＆ タイマー */}
+      {/* 画面ヘッダー ＆ ステータス */}
       <div className="bg-white rounded-3xl p-5 shadow-soft border border-slate-200/80 flex items-center justify-between">
         <div>
           <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
@@ -38,11 +45,9 @@ export default function AnswerPhase({
           </span>
           <h2 className="text-xs font-bold text-slate-500 mt-1">お題への回答を書いてね</h2>
         </div>
-        <div className="flex items-center space-x-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-          <Clock className={`w-4 h-4 ${timeRemaining > 0 ? 'text-blue-600 animate-pulse' : 'text-slate-400'}`} />
-          <span className="text-xs font-black font-mono text-slate-800">
-            {timeRemaining > 0 ? `${timeRemaining}秒` : '0秒 (目安)'}
-          </span>
+        <div className="flex items-center space-x-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl border border-blue-100">
+          <Clock className="w-4 h-4 text-blue-600 animate-pulse" />
+          <span className="text-xs font-bold">回答受付中</span>
         </div>
       </div>
 
@@ -147,16 +152,16 @@ export default function AnswerPhase({
         </div>
       </div>
 
-      {/* ホスト専用：推測フェーズ（匿名読み上げ）を開始するボタン */}
+      {/* ホスト専用：手動スタートボタン */}
       {isHost && (
         <div className="pt-2 space-y-2">
           {submittedCount >= totalPlayers && (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3 rounded-2xl text-center animate-bounce-short">
-              🎉 全員の回答が集まったよ！ボタンを押して回答当てを始めよう
+              🎉 全員の回答が集まったよ！
             </div>
           )}
           <button
-            onClick={onStartGuess}
+            onClick={() => setShowHostDialog(true)}
             disabled={submittedCount === 0}
             className={`w-full flex items-center justify-center space-x-2 font-extrabold py-4 rounded-2xl text-sm transition-all ${
               submittedCount >= totalPlayers
@@ -173,6 +178,37 @@ export default function AnswerPhase({
             </span>
             <ArrowRight className="w-4 h-4" />
           </button>
+        </div>
+      )}
+
+      {/* ホスト専用：全員回答完了ポップアップモーダルダイアログ */}
+      {isHost && showHostDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center space-y-4 animate-pop">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto shadow-md shadow-blue-500/20">
+              <Sparkles className="w-8 h-8" />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-base font-black text-slate-800 leading-snug">
+                全員の回答がそろいました。<br />今回当ててもらうのは・・・
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                OKを押すとランダムに選ばれた1つの回答が発表されて、話し合いがスタートするよ！
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowHostDialog(false);
+                onStartGuess();
+              }}
+              className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.98] text-white font-black py-4 rounded-2xl text-sm shadow-pop transition-all"
+            >
+              <span>OK (話し合いをスタートする)</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 

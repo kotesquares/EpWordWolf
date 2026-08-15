@@ -55,7 +55,7 @@ export default function GuessPhase({
         <div className="flex items-center space-x-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
           <Clock className={`w-4 h-4 ${timeRemaining > 0 ? 'text-purple-600 animate-pulse' : 'text-slate-400'}`} />
           <span className="text-xs font-black font-mono text-slate-800">
-            {timeRemaining > 0 ? `${timeRemaining}秒` : '0秒 (目安)'}
+            {timeRemaining > 0 ? `話し合い ${timeRemaining}秒` : '0秒 (目安)'}
           </span>
         </div>
       </div>

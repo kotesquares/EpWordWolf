@@ -279,13 +279,13 @@ export class PeerManager {
 
   startAnswerPhase() {
     if (!this.isHost) return;
+    this.stopTimer();
     this.state.phase = 'ANSWERING';
     this.state.answers = {};
     this.state.votes = {};
     this.state.currentEpisodeIndex = 0;
-    this.state.timeRemaining = this.state.timeLimit;
+    this.state.timeRemaining = 0; // 回答中はカウントダウンしない
     
-    this.startTimer(null);
     this.broadcastState();
   }
 
@@ -312,9 +312,11 @@ export class PeerManager {
     this.state.currentEpisodeIndex = 0;
     this.state.phase = 'GUESSING';
     this.state.votes = {};
-    this.state.timeRemaining = 60;
-
+    
+    // ここで話し合いの制限時間をセットしてカウントダウンスタート！
+    this.state.timeRemaining = this.state.timeLimit || 120;
     this.startTimer(null);
+
     this.broadcastState();
   }
 
