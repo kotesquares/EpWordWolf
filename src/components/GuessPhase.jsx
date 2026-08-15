@@ -53,12 +53,14 @@ export default function GuessPhase({
             PHASE 2: 誰の文章でしょう？
           </span>
           <h2 className="text-xs font-bold text-slate-500 mt-1">
-            エピソード <span className="text-purple-600 font-extrabold text-sm">{currentIndex + 1}</span> / {episodeOrder.length}
+            ピックアップ・エピソード <span className="text-purple-600 font-extrabold text-sm">(1件)</span>
           </h2>
         </div>
         <div className="flex items-center space-x-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-          <Clock className="w-4 h-4 text-purple-600 animate-pulse" />
-          <span className="text-xs font-black font-mono text-slate-800">{timeRemaining}秒</span>
+          <Clock className={`w-4 h-4 ${timeRemaining > 0 ? 'text-purple-600 animate-pulse' : 'text-rose-500'}`} />
+          <span className="text-xs font-black font-mono text-slate-800">
+            {timeRemaining > 0 ? `${timeRemaining}秒` : '0秒 (投票受付中)'}
+          </span>
         </div>
       </div>
 
@@ -142,14 +144,14 @@ export default function GuessPhase({
 
       </div>
 
-      {/* ホスト専用：スキップ・手動次へボタン */}
+      {/* ホスト専用：手動で結果発表へ進むボタン */}
       {isHost && (
         <div className="pt-2">
           <button
             onClick={onNextEpisode}
             className="w-full flex items-center justify-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl text-xs transition-colors border border-slate-200"
           >
-            <span>全員の投票を待たずに次へ（ホスト操作）</span>
+            <span>全員の投票を待たずに結果発表へ進む（ホスト操作）</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

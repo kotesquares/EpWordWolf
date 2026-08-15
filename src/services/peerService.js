@@ -210,11 +210,11 @@ export class PeerManager {
         this.broadcastState();
 
         // 現在のエピソードに対して全員が投票完了したか判定
-        const currentAuthorId = this.state.episodeOrder[this.state.currentEpisodeIndex];
+        const currentAuthorId = this.state.episodeOrder[0];
         const currentVotes = this.state.votes[currentAuthorId] || {};
         if (Object.keys(currentVotes).length >= this.state.players.length) {
-          // 自動で次のエピソードへ進むか、結果フェーズへ
-          this.advanceEpisodeOrFinish();
+          // 全員の投票完了 ➔ 結果発表へ
+          this.calculateScoresAndFinish();
         }
         break;
       }
@@ -291,7 +291,6 @@ export class PeerManager {
     if (!this.isHost) return;
     this.stopTimer();
 
-    // 回答が提出されているプレイヤーのIDをシャッフル
     const answeredPlayerIds = Object.keys(this.state.answers);
     if (answeredPlayerIds.length === 0) {
       alert('誰も回答を提出しませんでした！');
@@ -300,16 +299,16 @@ export class PeerManager {
       return;
     }
 
-    this.state.episodeOrder = shuffleArray(answeredPlayerIds);
+    // 集まった回答の中からランダムに1つだけをピックアップ選出
+    const randomAuthorId = answeredPlayerIds[Math.floor(Math.random() * answeredPlayerIds.length)];
+    this.state.episodeOrder = [randomAuthorId];
     this.state.currentEpisodeIndex = 0;
     this.state.phase = 'GUESSING';
     this.state.votes = {};
-    this.state.timeRemaining = 60; // 推測は60秒/エピソード
+    this.state.timeRemaining = 60; // 60秒目安（0秒になっても強制終了せず投票可能）
 
-    this.startTimer(() => {
-      // 時間切れで次のエピソードまたは結果へ
-      this.advanceEpisodeOrFinish();
-    });
+    // タイマー開始（0秒になっても自動で画面遷移しない）
+    this.startTimer(null);
 
     this.broadcastState();
   }
@@ -317,20 +316,16 @@ export class PeerManager {
   // 投票入力（Host自身用）
   submitHostVote(guessedAuthorId) {
     if (!this.isHost) return;
-    const currentAuthorId = this.state.episodeOrder[this.state.currentEpisodeIndex];
+    const currentAuthorId = this.state.episodeOrder[0];
     if (!this.state.votes[currentAuthorId]) {
       this.state.votes[currentAuthorId] = {};
     }
     this.state.votes[currentAuthorId][this.myPlayerId] = guessedAuthorId;
     this.broadcastState();
 
+    // 全員の投票が完了したら即ゲーム終了（結果発表へ）
     const currentVotes = this.state.votes[currentAuthorId] || {};
     if (Object.keys(currentVotes).length >= this.state.players.length) {
-      this.advanceEpisodeOrFinish();
-    }
-  }
-
-  // 手動または自動で次のエピソードへ進む / 終了
   nextEpisode() {
     if (!this.isHost) return;
     this.advanceEpisodeOrFinish();
