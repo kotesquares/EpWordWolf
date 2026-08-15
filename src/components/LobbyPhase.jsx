@@ -16,7 +16,7 @@ export default function LobbyPhase({
   });
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [topicInput, setTopicInput] = useState(gameState?.topic || 'もし1億円が手に入ったら何に使う？');
+  const [topicInput, setTopicInput] = useState(gameState?.topic || '');
   const [timeLimitSelect, setTimeLimitSelect] = useState(gameState?.timeLimit || 120);
   const [isJoiningMode, setIsJoiningMode] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -275,8 +275,8 @@ export default function LobbyPhase({
                   value={topicInput}
                   onChange={handleTopicChange}
                   rows={2}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
-                  placeholder="お題を自由に入力してね"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none placeholder:font-normal placeholder:text-slate-400"
+                  placeholder="例：もし1億円が手に入ったら何に使う？（ガチャで選ぶか自由に入力してね）"
                 />
 
                 {/* お題ガチャ枠 */}
