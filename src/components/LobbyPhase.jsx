@@ -149,8 +149,9 @@ export default function LobbyPhase({
           <Sparkles className="w-3.5 h-3.5" />
           <span>みんなで遊べる匿名推測ゲーム！</span>
         </div>
-        <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-          誰の文章でしょう？
+        <h2 className="text-2xl font-black text-slate-800 tracking-tight flex items-center justify-center gap-2">
+          <img src="./icons/eww192.png" alt="誰の文章？" className="w-8 h-8 rounded-xl shadow-sm border border-slate-100 object-cover" />
+          <span>誰の文章でしょう？</span>
         </h2>
         <p className="text-xs text-slate-500 max-w-sm mx-auto">
           お題に答えて、誰が書いた文章か当てっこしよう！自分の文章は上手くだましてね。

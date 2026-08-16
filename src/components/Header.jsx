@@ -26,10 +26,12 @@ export default function Header({ gameState, myPlayerId, onOpenQR, onLeaveRoom })
       <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
         
         {/* ロゴ */}
-        <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-            <MessageSquareHeart className="w-5 h-5" />
-          </div>
+        <div className="flex items-center space-x-2.5">
+          <img
+            src="./icons/eww192.png"
+            alt="誰の文章？"
+            className="w-9 h-9 rounded-xl shadow-sm border border-slate-100 object-cover"
+          />
           <div>
             <h1 className="font-extrabold text-slate-800 text-base leading-tight tracking-tight flex items-center gap-1">
               誰の文章？
