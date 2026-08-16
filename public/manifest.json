@@ -1,0 +1,25 @@
+{
+  "name": "誰の文章でしょう？ - エピソード推測ゲーム",
+  "short_name": "誰の文章？",
+  "description": "みんなでエピソードを匿名で投稿して誰の回答かを当てる、GM不要のエピソード推測人狼ゲーム！",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "icons/eww192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/eww512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

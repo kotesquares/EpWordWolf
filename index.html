@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>誰の文章でしょう？ - エピソード人狼推測ゲーム</title>
     <meta name="description" content="みんなでエピソードを匿名で投稿して誰の回答かを当てる、GM不要のエピソード推測人狼ゲーム！" />
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/eww192.png" />
+    <link rel="apple-touch-icon" href="./icons/eww192.png" />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="誰の文章？" />
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,5 +23,19 @@
   <body class="bg-slate-50 text-slate-800 antialiased font-sans selection:bg-blue-100 selection:text-blue-700 min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').then((reg) => {
+            console.log('ServiceWorker registered successfully:', reg.scope);
+          }).catch((err) => {
+            console.error('ServiceWorker registration failed:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>
+
